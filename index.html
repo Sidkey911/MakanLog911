@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#112b2b">
+  <meta name="description" content="A private, offline-first calorie tracker for every meal. No account required.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="MakanLog">
+  <meta name="color-scheme" content="light dark">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>MakanLog — Offline Calorie Tracker</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-symbol" aria-hidden="true"><span>m.</span></div>
+        <div class="brand-text"><strong>MakanLog</strong><small>eat well, keep track</small></div>
+      </div>
+      <div class="header-actions">
+        <span id="connection-status" class="connection-status"><span class="status-dot"></span> Offline ready</span>
+        <button class="icon-btn theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle theme">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.9 13.2A9 9 0 0 1 10.8 3.1 9 9 0 1 0 20.9 13.2Z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="page active" id="page-today" aria-labelledby="today-title">
+        <div class="section-heading date-heading">
+          <div><p class="eyebrow" id="today-label">YOUR FOOD DIARY</p><h1 id="today-title">Today, you’re doing great.</h1></div>
+          <div class="date-controls">
+            <button type="button" id="prev-day" class="icon-btn" aria-label="Previous day">‹</button>
+            <label class="date-picker"><span class="sr-only">Choose diary date</span><input type="date" id="diary-date" aria-label="Choose diary date"></label>
+            <button type="button" id="next-day" class="icon-btn" aria-label="Next day">›</button>
+          </div>
+        </div>
+        <section class="hero-card" aria-label="Daily calories">
+          <div class="hero-top"><span class="capsule">DAILY CALORIE GOAL</span><span class="hero-icon" aria-hidden="true">✦</span></div>
+          <div class="hero-body">
+            <div class="ring-wrap">
+              <div class="calorie-ring" id="calorie-ring" role="img" aria-label="Calorie goal progress">
+                <div class="ring-inner"><span class="ring-number" id="eaten-number">0</span><span class="ring-unit">kcal eaten</span></div>
+              </div>
+            </div>
+            <div class="hero-stats">
+              <p class="hero-caption" id="remaining-label">Remaining today</p>
+              <div class="remaining-number" id="remaining-number">1,777 <span>kcal</span></div>
+              <div class="goal-divider"></div>
+              <p class="hero-goal">Daily target <strong id="daily-target">1,777 kcal</strong></p>
+              <p class="hero-hint" id="goal-hint">Ready for your first meal?</p>
+            </div>
+          </div>
+          <div class="hero-bottom"><span id="progress-description">0% of daily goal</span><span id="food-entry-count">0 items logged</span></div>
+        </section>
+        <section class="macro-card" aria-label="Today's macronutrients">
+          <div class="mini-heading"><h2>Nutrition breakdown</h2><span>estimated from entries</span></div>
+          <div class="macro-grid">
+            <div class="macro"><div class="macro-top"><span>Protein</span><strong id="protein-number">0g</strong></div><div class="track"><div class="fill protein" id="protein-fill"></div></div></div>
+            <div class="macro"><div class="macro-top"><span>Carbs</span><strong id="carbs-number">0g</strong></div><div class="track"><div class="fill carbs" id="carbs-fill"></div></div></div>
+            <div class="macro"><div class="macro-top"><span>Fat</span><strong id="fat-number">0g</strong></div><div class="track"><div class="fill fat" id="fat-fill"></div></div></div>
+          </div>
+        </section>
+        <button id="photo-hero-button" type="button" class="photo-hero-button"><span class="photo-hero-symbol" aria-hidden="true">📷</span><span><strong>Snap your meal</strong><small>Photo → estimated calories → add to diary</small></span><span aria-hidden="true">→</span></button>
+        <div class="list-header"><div><p class="eyebrow">YOUR MEALS</p><h2>Today’s food diary</h2></div><button type="button" id="go-today" class="subtle-btn" hidden>Jump to today</button></div>
+        <div class="meals" id="meal-list"></div>
+        <div class="closing-note"><span>✳</span> Food estimates are approximate. Check labels for the most accurate values.</div>
+      </section>
+
+      <section class="page" id="page-foods" aria-labelledby="foods-title">
+        <div class="section-heading"><div><p class="eyebrow">OFFLINE FOOD LIBRARY</p><h1 id="foods-title">Find your food.</h1><p class="lead">Pick a food, enter your portion, and we’ll do the maths.</p></div></div>
+        <div class="search-shell"><svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path></svg><input id="food-search" type="search" placeholder="Search rice, chicken, roti canai..." aria-label="Search foods" autocomplete="off"></div>
+        <div class="chip-scroll" id="food-categories" role="group" aria-label="Food categories"></div>
+        <div class="food-list-title"><h2 id="foods-section-label">All foods</h2><button type="button" class="text-action" id="make-custom">+ Create food</button></div>
+        <div id="food-library-list" class="food-list"></div>
+        <p class="footnote">Library values are general estimates per 100g (or approximate mL for drinks). Recipes, oils, and serving sizes change the actual calories.</p>
+      </section>
+
+      <section class="page" id="page-history" aria-labelledby="history-title">
+        <div class="section-heading"><div><p class="eyebrow">KEEP YOUR MOMENTUM</p><h1 id="history-title">Your progress.</h1><p class="lead">Your patterns matter more than any single meal.</p></div></div>
+        <div class="history-stats" id="history-stats"></div>
+        <section class="panel" aria-labelledby="week-title"><div class="panel-heading"><h2 id="week-title">Last 7 days</h2><span class="tiny-note">Daily calorie totals</span></div><div class="weekly-graph" id="weekly-graph"></div><div class="graph-legend"><span class="legend-dot"></span> Goal: <strong id="graph-goal">1,777</strong> kcal / day</div></section>
+        <section class="panel" aria-labelledby="history-list-title"><div class="panel-heading"><h2 id="history-list-title">Recent days</h2><span class="tiny-note">Tap to view meals</span></div><div id="history-days"></div></section>
+      </section>
+
+      <section class="page" id="page-settings" aria-labelledby="settings-title">
+        <div class="section-heading"><div><p class="eyebrow">MADE FOR YOU</p><h1 id="settings-title">Your settings.</h1><p class="lead">Simple tools. Your food data stays on this device.</p></div></div>
+        <section class="panel settings-panel"><h2>Daily calorie target</h2><p class="settings-desc">Set a goal that suits your needs. All daily totals update automatically.</p><form id="goal-form" class="settings-form"><label for="goal-input">Daily goal (kcal)</label><div class="settings-form-row"><input id="goal-input" type="number" min="500" max="10000" step="1" required inputmode="numeric"><button type="submit" class="primary-btn">Save goal</button></div></form><p class="tiny-note">Default is 1,777 kcal. This is a tracking target, not a personalised medical recommendation.</p></section>
+        <section class="panel settings-panel"><h2>Photo calorie estimator</h2><p class="settings-desc">AI recognition is optional. On the first use with internet, the app downloads and caches the image model. After that, it can classify supported foods offline (subject to device storage and browser compatibility). Food and serving confirmation always remain manual.</p><button type="button" id="settings-photo-open" class="outline-btn">📷 Try photo estimator</button></section>
+        <section class="panel settings-panel"><h2>Appearance</h2><label for="theme-choice" class="field-label">App theme</label><select id="theme-choice" class="simple-select"><option value="system">Match phone setting</option><option value="light">Light</option><option value="dark">Dark</option></select></section>
+        <section class="panel settings-panel"><h2>Your data & backup</h2><p class="settings-desc">No accounts, no advertising, and no cloud database. Saved in this app's local storage. Export a backup regularly, especially before clearing Safari data or changing phones.</p>
+          <div class="settings-actions"><button class="outline-btn" type="button" id="export-json">↓ Backup (JSON)</button><button class="outline-btn" type="button" id="export-csv">↓ Export meals (CSV)</button><button class="outline-btn" type="button" id="import-json">↑ Restore backup</button><input type="file" id="import-file" accept="application/json,.json" hidden></div>
+          <div class="data-count" id="data-count"></div><button class="danger-link" type="button" id="clear-data">Delete all my entries</button>
+        </section>
+        <section class="panel settings-panel"><h2>Install and offline use</h2><p class="settings-desc">After opening this site online once, save it to your Home Screen. The app's files are cached for offline use. Logged meals work without a connection.</p><div id="install-guide" class="install-guide"></div><button type="button" id="install-button" class="primary-btn install-btn" hidden>Install app</button></section>
+        <div class="about"><div class="brand-symbol small" aria-hidden="true">m.</div><p><strong>MakanLog</strong> · v2.0<br>Photo-assisted estimates, stored only on this phone.</p></div>
+      </section>
+    </main>
+
+    <button id="floating-add" class="floating-add" type="button" aria-label="Add a meal"><span aria-hidden="true">+</span> Add food</button>
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <button type="button" class="nav-item active" data-page="today" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20h-6v-6h-4v6H4z"/></svg><span>Today</span></button>
+      <button type="button" class="nav-item" data-page="foods"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 3v8M5 3v8M11 3v8M8 11v10M16 21V3c4 3 4 8 4 12h-4"/></svg><span>Foods</span></button>
+      <button type="button" class="nav-item" data-page="history"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 20V11m5 9V6m5 14v-8m5 8V3"/></svg><span>History</span></button>
+      <button type="button" class="nav-item" data-page="settings"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.5 2.6-1.7-.7a8 8 0 0 1-2.1 1.2L15.3 21h-3l-.3-1.7a8 8 0 0 1-2.1-1.2l-1.7.7-1.5-2.6 1.4-1.1a9 9 0 0 1 0-2.4l-1.4-1.1L8.2 9l1.7.7A8 8 0 0 1 12 8.5l.3-1.7h3l.3 1.7a8 8 0 0 1 2.1 1.2l1.7-.7 1.5 2.6-1.4 1.1a9 9 0 0 1-.1 2.3Z" transform="translate(-1.8,-2) scale(1.15)"/></svg><span>Settings</span></button>
+    </nav>
+  </div>
+
+  <div id="modal-backdrop" class="modal-backdrop" hidden>
+    <div id="food-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-handle" aria-hidden="true"></div>
+      <div class="modal-header"><div><p class="eyebrow">FOOD TRACKER</p><h2 id="modal-title">Add something tasty</h2></div><button type="button" class="icon-btn modal-close" id="close-modal" aria-label="Close">×</button></div>
+      <div class="modal-tabs" role="tablist" aria-label="Add food method">
+        <button type="button" class="modal-tab" data-modal-tab="photo" role="tab" aria-selected="false">📷 Photo</button>
+        <button type="button" class="modal-tab active" data-modal-tab="search" role="tab" aria-selected="true">Food library</button>
+        <button type="button" class="modal-tab" data-modal-tab="quick" role="tab" aria-selected="false">Quick add</button>
+        <button type="button" class="modal-tab" data-modal-tab="custom" role="tab" aria-selected="false">My foods</button>
+      </div>
+      <div class="modal-content">
+        <div id="photo-form" class="entry-form photo-form" hidden>
+          <p class="photo-explainer">Take a picture or choose one from Photos. On-device AI can <strong>suggest some food names</strong>; check everything and adjust serving sizes before logging.</p>
+          <div class="photo-choose-row">
+            <label class="photo-choose" for="photo-camera"><span aria-hidden="true">📸</span> Take photo</label>
+            <label class="photo-choose" for="photo-gallery"><span aria-hidden="true">🖼️</span> Choose photo</label>
+            <input type="file" id="photo-camera" accept="image/*" capture="environment" hidden>
+            <input type="file" id="photo-gallery" accept="image/*" hidden>
+          </div>
+          <div id="photo-preview-shell" class="photo-preview-shell" hidden><img id="photo-preview" alt="Your meal, ready for estimation"></div>
+          <div class="photo-ai-panel">
+            <div class="photo-ai-top"><div><strong>On-device food recognition</strong><small>AI files download once; no photos sent to a server</small></div><span aria-hidden="true">✧</span></div>
+            <button type="button" class="primary-btn full" id="photo-analyse" disabled>Analyse photo with AI</button>
+            <p id="photo-ai-status" class="form-hint" role="status" aria-live="polite">Select a photo to begin. First AI scan needs internet to download the model.</p>
+            <div id="photo-predictions" class="photo-predictions" hidden></div>
+          </div>
+          <div class="photo-builder">
+            <div class="photo-builder-heading"><strong>Foods on your plate</strong><small>Add more than one food</small></div>
+            <label class="field-label" for="photo-food-search">Search / correct food name</label>
+            <input type="search" id="photo-food-search" placeholder="Rice, air-fried chicken, egg..." autocomplete="off">
+            <div id="photo-food-suggestions" class="photo-food-suggestions"></div>
+            <div id="photo-items" class="photo-items"></div>
+          </div>
+          <div class="two-fields photo-bottom-fields">
+            <div><label class="field-label" for="photo-meal">Add to meal</label><select id="photo-meal" class="simple-select meal-select"></select></div>
+            <div class="photo-total"><span>Meal estimate</span><strong id="photo-calorie-total">0 kcal</strong></div>
+          </div>
+          <p class="photo-disclaimer">Photo recognition can be wrong. Calories are calculated from the selected foods and approximate portion sizes—not measured from the photo. Oils, sauces and hidden ingredients need manual additions.</p>
+          <button class="primary-btn full" type="button" id="photo-save" disabled>Save estimated meal to diary</button>
+        </div>
+        <form id="library-form" class="entry-form" autocomplete="off">
+          <label class="field-label" for="modal-search">Search food</label>
+          <input type="search" id="modal-search" placeholder="e.g. cooked rice, chicken, egg">
+          <div class="modal-suggestions" id="modal-suggestions"></div>
+          <div class="selection-preview" id="selection-preview" hidden></div>
+          <div class="two-fields">
+            <div><label class="field-label" for="food-portion">Portion (g / approximate mL)</label><input id="food-portion" type="number" min="1" max="10000" step="1" inputmode="decimal" required></div>
+            <div><label class="field-label" for="library-meal">Meal</label><select id="library-meal" class="simple-select meal-select"></select></div>
+          </div>
+          <div class="portion-presets" id="portion-presets" role="group" aria-label="Fast portion sizes"><span>Quick portion:</span><button type="button" data-portion="0.5">½ serving</button><button type="button" data-portion="1">1 serving</button><button type="button" data-portion="2">2 servings</button></div>
+          <div class="calorie-preview"><span>Calculated calories</span><strong id="calorie-preview">0 kcal</strong></div>
+          <button class="primary-btn full" id="add-library" type="submit" disabled>Add to diary</button>
+        </form>
+        <form id="quick-form" class="entry-form" autocomplete="off" hidden>
+          <div><label class="field-label" for="quick-name">Food name</label><input id="quick-name" type="text" placeholder="e.g. Mom's homemade pasta" maxlength="90" required></div>
+          <div class="two-fields"><div><label class="field-label" for="quick-calories">Calories (kcal)</label><input id="quick-calories" type="number" min="0" max="30000" step="1" inputmode="decimal" placeholder="350" required></div><div><label class="field-label" for="quick-meal">Meal</label><select id="quick-meal" class="simple-select meal-select"></select></div></div>
+          <p class="form-hint">Optional nutrition (grams)</p>
+          <div class="three-fields"><div><label class="field-label" for="quick-protein">Protein</label><input id="quick-protein" type="number" min="0" max="1000" step="0.1" inputmode="decimal" placeholder="0"></div><div><label class="field-label" for="quick-carbs">Carbs</label><input id="quick-carbs" type="number" min="0" max="1000" step="0.1" inputmode="decimal" placeholder="0"></div><div><label class="field-label" for="quick-fat">Fat</label><input id="quick-fat" type="number" min="0" max="1000" step="0.1" inputmode="decimal" placeholder="0"></div></div>
+          <button class="primary-btn full" type="submit" id="submit-quick">Add to diary</button>
+        </form>
+        <form id="custom-form" class="entry-form" autocomplete="off" hidden>
+          <p class="form-hint">Save your own food to use again. Enter nutrition <strong>per 100g</strong>.</p>
+          <div><label class="field-label" for="custom-name">Food name</label><input id="custom-name" type="text" maxlength="90" placeholder="e.g. My air-fried chicken" required></div>
+          <div class="two-fields"><div><label class="field-label" for="custom-calories">kcal per 100g</label><input id="custom-calories" type="number" min="0" max="2000" step="0.1" inputmode="decimal" required placeholder="165"></div><div><label class="field-label" for="custom-portion">Default portion (g)</label><input id="custom-portion" type="number" min="1" max="10000" step="1" inputmode="decimal" value="100" required></div></div>
+          <div class="three-fields"><div><label class="field-label" for="custom-protein">Protein / 100g</label><input id="custom-protein" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="0"></div><div><label class="field-label" for="custom-carbs">Carbs / 100g</label><input id="custom-carbs" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="0"></div><div><label class="field-label" for="custom-fat">Fat / 100g</label><input id="custom-fat" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="0"></div></div>
+          <div><label class="field-label" for="custom-meal">Add to meal</label><select id="custom-meal" class="simple-select meal-select"></select></div>
+          <button class="primary-btn full" type="submit">Save food & add to diary</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js" defer></script>
+  <script src="./photo.js" defer></script>
+</body>
+</html>
